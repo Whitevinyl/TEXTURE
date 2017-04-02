@@ -99,13 +99,13 @@ proto.drawNoise = function(canvas,scale,col,alpha,colorShift,erode) {
 //-------------------------------------------------------------------------------------------
 
 
-proto.cloud = function(scale,col,alpha,mode,col2) {
+proto.cloud = function(scale,col,alpha,dither,mode,col2) {
     var canvas = this.newCanvas();
-    return this.drawCloud(canvas,scale,col,alpha,mode,col2);
+    return this.drawCloud(canvas,scale,col,alpha,dither,mode,col2);
 };
 
 
-proto.drawCloud = function(canvas,scale,col,alpha,mode,col2) {
+proto.drawCloud = function(canvas,scale,col,alpha,dither,mode,col2) {
 
     // set context //
     var ctx = canvas.ctx;
@@ -115,6 +115,8 @@ proto.drawCloud = function(canvas,scale,col,alpha,mode,col2) {
     var simplex = new SimplexNoise();
     var cells = Math.ceil( this.size );
     scale *= 200;
+    dither = dither || 0;
+    dither *= 100;
     var r, g, b, a;
     r = g = b = a = 1;
     ctx.globalAlpha = alpha;
@@ -123,7 +125,14 @@ proto.drawCloud = function(canvas,scale,col,alpha,mode,col2) {
 
         for (var j = 0; j < cells; j++) { // rows //
 
-            var n = (simplex.noise(j / scale, i / scale) + 1) / 2;
+            var d = dither;
+            if (tombola.percent(10)) {
+                d *= 2;
+            }
+
+            var xOff = tombola.rangeFloat(-d,d);
+            var yOff = tombola.rangeFloat(-d,d);
+            var n = (simplex.noise((j + xOff) / scale, (i + yOff) / scale) + 1) / 2;
 
             a = 0;
             if (mode) {
@@ -337,4 +346,158 @@ proto.drawGrain = function(canvas,scale,col,alpha) {
 
     // return texture //
     return canvas.canvas;
+};
+
+
+//-------------------------------------------------------------------------------------------
+//  PAINT
+//-------------------------------------------------------------------------------------------
+
+
+proto.dirt = function(scale,col,alpha) {
+    var canvas = this.newCanvas();
+    return this.drawDirt(canvas,scale,col,alpha);
+};
+
+
+proto.drawDirt = function(canvas,scale,col,alpha) {
+
+    // set context //
+    var ctx = canvas.ctx;
+
+
+    // generate texture //
+    var simplex = new SimplexNoise();
+    ctx.globalAlpha = alpha;
+    color.fill(ctx, col );
+
+
+    var n = 500;
+    var t = 1000;
+    var r = 0.1 * scale;
+    var s = 10 * scale;
+
+    for (var i=0; i<n; i++) {  // particles //
+        var p = new PaintParticle(tombola.range(0,this.size), tombola.range(0,this.size));
+
+
+        for (var j=0; j<t; j++) {  // time //
+
+            // draw //
+            ctx.globalAlpha = 0.25;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+
+            // move //
+            var xOff = simplex.noise(p.x / r, p.y / r) * s;
+            var yOff = simplex.noise(p.x / r, -p.y / r) * s;
+            p.move(xOff,yOff);
+
+        }
+
+    }
+
+
+    // return texture //
+    return canvas.canvas;
+};
+
+
+//-------------------------------------------------------------------------------------------
+//  PAINT
+//-------------------------------------------------------------------------------------------
+
+
+proto.paint = function(scale,col1,col2,alpha) {
+    var canvas = this.newCanvas();
+    return this.drawPaint(canvas,scale,col1,col2,alpha);
+};
+
+
+proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
+
+    // set context //
+    var ctx = canvas.ctx;
+
+
+    // generate texture //
+    var simplex = new SimplexNoise();
+    scale *= 200;
+    var cells = Math.ceil( this.size );
+    ctx.globalAlpha = alpha;
+    color.fill(ctx, col1 );
+    ctx.fillRect(0, 0, this.size, this.size);
+    color.fill(ctx, col2 );
+    color.stroke(ctx, col2 );
+
+
+    var n = tombola.range(1000,2000);
+    var t = tombola.range(500,1000);
+    n = 1500;
+    t = 400;
+    var particles = [];
+
+    for (var i=0; i<n; i++) {  // particles //
+        var p = new PaintParticle(tombola.range(0,this.size), tombola.range(0,this.size));
+        particles.push(p);
+
+
+        for (var j=0; j<t; j++) {  // time //
+
+            // draw //
+            var r = 500;
+            ctx.globalAlpha = 0.25;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+
+            // move //
+            r = 0.001;
+            var s = 1.5;
+            var xOff = simplex.noise(p.x / r, p.y / r) * s;
+            var yOff = simplex.noise(p.x / r, -p.y / r) * s;
+            p.move(xOff,yOff);
+
+        }
+
+
+    }
+
+
+    /*for (var i=0; i<cells; i++) {  // columns //
+
+        for (var j = 0; j < cells; j++) { // rows //
+
+            var s2 = scale;
+            var r = 60;
+            var xOff = simplex.noise(i / s2, j / s2) * r;
+            var yOff = (simplex.noise(i / s2, (j + 500) / s2) * r);
+
+            var d = 0.1;
+            var xd = tombola.rangeFloat(-d,d);
+            var yd = tombola.rangeFloat(-d,d);
+
+
+            var n = (simplex.noise((j + xd) / (scale/300), (i + yd) / (scale * 500)) + 1) / 2;
+            var fillCol = color.blend(col1, col2, n*100);
+
+            color.fill(ctx, fillCol );
+            ctx.fillRect(i, j + yOff, 1, 1);
+        }
+
+    }*/
+
+
+    // return texture //
+    return canvas.canvas;
+};
+
+
+function PaintParticle(x,y) {
+    this.x = x;
+    this.y = y;
+    this.size = tombola.rangeFloat(0.3,1);
+}
+proto = PaintParticle.prototype;
+
+proto.move = function(xs,ys) {
+    this.x += xs;
+    this.y += ys;
 };

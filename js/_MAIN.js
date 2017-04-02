@@ -41,7 +41,7 @@ var textCol = new RGBA(255,255,255,1);
 
 // TEXTURE //
 var texture;
-var textureCol = [new RGBA(20,30,255,1),new RGBA(255,88,236,1),new RGBA(10,180,150,1),new RGBA(255,245,235,1),new RGBA(5,5,5,1)];
+var textureCol = [new RGBA(20,30,255,1),new RGBA(255,88,236,1),new RGBA(10,200,200,1),new RGBA(255,245,235,1),new RGBA(5,5,5,1)];
 var noiseTexture;
 
 //-------------------------------------------------------------------------------------------
@@ -74,15 +74,18 @@ function init() {
 
     texture = new Texture(512);
     //noiseTexture = texture.noise(1, textureCol[1], 0.75, 0.8, 0.5);
-    //noiseTexture = texture.cloud(1.8, textureCol[1], 1, "blue", textureCol[2]);
+    //noiseTexture = texture.cloud(1.8, textureCol[1], 1, 0.1, "blue", textureCol[2]);
     //noiseTexture = texture.flecks(1.3, 0.4, textureCol[3], 1);
     //noiseTexture = texture.dust(0.6, 1, textureCol[3], 1);
 
-    noiseTexture = texture.noise(0.75, textureCol[0], 0.5, 1, 0.5);
-    noiseTexture = texture.drawCloud(texture.canvasObj(noiseTexture),3, textureCol[1], 0.1, "blue", textureCol[2]);
+    /*noiseTexture = texture.noise(0.75, textureCol[1], 0.75, 1, 0.5);
+    noiseTexture = texture.drawCloud(texture.canvasObj(noiseTexture),3, textureCol[1], 0.1, 0.1,"blue", textureCol[2]);
     noiseTexture = texture.drawFlecks(texture.canvasObj(noiseTexture),1.5, 1, textureCol[3], 0.3);
-    noiseTexture = texture.drawDust(texture.canvasObj(noiseTexture),0.6, 2, textureCol[3], 0.3);
+    noiseTexture = texture.drawDust(texture.canvasObj(noiseTexture),0.6, 2, textureCol[3], 0.3);*/
 
+    //noiseTexture = texture.paint(2, textureCol[3], textureCol[4], 1);
+    noiseTexture = texture.dirt(0.2, textureCol[2], 1);
+    //noiseTexture = texture.cloud(1.8, textureCol[0], 1, 0.3, "blue", textureCol[1]);
 
 
     // DONE //
