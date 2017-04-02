@@ -27,13 +27,16 @@ proto.setRepeat = function(repeat) {
 
 proto.newCanvas = function() {
     var canvas = document.createElement('canvas');
-    var ctx = canvas.getContext('2d');
     canvas.width = this.size;
     canvas.height = this.size;
 
+    return this.canvasObj(canvas);
+};
+
+proto.canvasObj = function(canvas) {
     return {
         canvas: canvas,
-        ctx: ctx
+        ctx: canvas.getContext('2d')
     }
 };
 
@@ -47,9 +50,14 @@ proto.newCanvas = function() {
 
 
 proto.noise = function(scale,col,alpha,colorShift,erode) {
-
-    // create canvas //
     var canvas = this.newCanvas();
+    return this.drawNoise(canvas,scale,col,alpha,colorShift,erode);
+};
+
+
+proto.drawNoise = function(canvas,scale,col,alpha,colorShift,erode) {
+
+    // set context //
     var ctx = canvas.ctx;
 
 
@@ -92,9 +100,14 @@ proto.noise = function(scale,col,alpha,colorShift,erode) {
 
 
 proto.cloud = function(scale,col,alpha,mode,col2) {
-
-    // create canvas //
     var canvas = this.newCanvas();
+    return this.drawCloud(canvas,scale,col,alpha,mode,col2);
+};
+
+
+proto.drawCloud = function(canvas,scale,col,alpha,mode,col2) {
+
+    // set context //
     var ctx = canvas.ctx;
 
 
@@ -158,9 +171,14 @@ proto.cloud = function(scale,col,alpha,mode,col2) {
 
 
 proto.flecks = function(scale,density,col,alpha) {
-
-    // create canvas //
     var canvas = this.newCanvas();
+    return this.drawFlecks(canvas,scale,density,col,alpha);
+};
+
+
+proto.drawFlecks = function(canvas,scale,density,col,alpha) {
+
+    // set context //
     var ctx = canvas.ctx;
 
 
@@ -196,9 +214,14 @@ proto.flecks = function(scale,density,col,alpha) {
 
 
 proto.dust = function(scale,density,col,alpha) {
-
-    // create canvas //
     var canvas = this.newCanvas();
+    return this.drawDust(canvas,scale,density,col,alpha);
+};
+
+
+proto.drawDust = function(canvas,scale,density,col,alpha) {
+
+    // set context //
     var ctx = canvas.ctx;
 
 
@@ -215,7 +238,9 @@ proto.dust = function(scale,density,col,alpha) {
         var x = Math.random() * this.size;
         var y = Math.random() * this.size;
         var fleck = scale * tombola.rangeFloat(1,2.5);
-        var r = fleck * tombola.rangeFloat(0.2,0.6);
+        var r = fleck * tombola.rangeFloat(0.2,0.8);
+        //r = fleck * tombola.rangeFloat(6,10);
+
 
         // hairs //
         if (tombola.percent(0.2)) {
@@ -268,10 +293,6 @@ proto.dust = function(scale,density,col,alpha) {
             ctx.globalAlpha = n * alpha;
             ctx.fillRect(x, y, fleck, fleck);
         }
-
-
-
-
     }
 
 
@@ -286,9 +307,14 @@ proto.dust = function(scale,density,col,alpha) {
 
 
 proto.grain = function(scale,col,alpha) {
-
-    // create canvas //
     var canvas = this.newCanvas();
+    return this.drawGrain(canvas,scale,col,alpha);
+};
+
+
+proto.drawGrain = function(canvas,scale,col,alpha) {
+
+    // set context //
     var ctx = canvas.ctx;
 
 
