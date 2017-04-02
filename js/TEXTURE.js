@@ -41,6 +41,9 @@ proto.newCanvas = function() {
 //-------------------------------------------------------------------------------------------
 //  GENERATE
 //-------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
+//  NOISE
+//-------------------------------------------------------------------------------------------
 
 
 proto.noise = function(scale,col,alpha,colorShift,erode) {
@@ -83,7 +86,12 @@ proto.noise = function(scale,col,alpha,colorShift,erode) {
 };
 
 
-proto.cloud = function(scale,col,alpha,mode) {
+//-------------------------------------------------------------------------------------------
+//  CLOUD
+//-------------------------------------------------------------------------------------------
+
+
+proto.cloud = function(scale,col,alpha,mode,col2) {
 
     // create canvas //
     var canvas = this.newCanvas();
@@ -103,23 +111,102 @@ proto.cloud = function(scale,col,alpha,mode) {
         for (var j = 0; j < cells; j++) { // rows //
 
             var n = (simplex.noise(j / scale, i / scale) + 1) / 2;
-            a = n;
+
+            a = 0;
             if (mode) {
                 switch (mode) {
                     case 'red':
-                        r = n;
+                        r = 0;
                         a = 1;
                         break;
                     case 'green':
-                        g = n;
+                        g = 0;
                         a = 1;
                         break;
                     case 'blue':
-                        b = n;
+                        b = 0;
                         a = 1;
+                        break;
+                    case 'alpha':
+                        a = 0;
                         break;
                 }
             }
+
+            if (!col2) {
+                col2 = new RGBA(col.R * r, col.G * g, col.B * b, col.A * a);
+            }
+
+
+            var fillCol = color.blend(col2, col, n * 100);
+
+            color.fill(ctx, fillCol );
+            ctx.fillRect(i, j, 1, 1);
+        }
+
+    }
+
+
+    // return texture //
+    return canvas.canvas;
+};
+
+
+//-------------------------------------------------------------------------------------------
+//  FLECKS
+//-------------------------------------------------------------------------------------------
+
+
+proto.flecks = function(scale,col,alpha) {
+
+    // create canvas //
+    var canvas = this.newCanvas();
+    var ctx = canvas.ctx;
+
+
+    // generate texture //
+    var cells = Math.ceil( this.size );
+    var r, g, b, a;
+    r = g = b = a = 1;
+    ctx.globalAlpha = alpha;
+
+    for (var i=0; i<cells; i++) {  // columns //
+
+        for (var j = 0; j < cells; j++) { // rows //
+
+            color.fillRGBA(ctx, col.R * r, col.G * g, col.B * b, col.A * a );
+            ctx.fillRect(i, j, 1, 1);
+        }
+
+    }
+
+
+    // return texture //
+    return canvas.canvas;
+};
+
+
+//-------------------------------------------------------------------------------------------
+//  DUST
+//-------------------------------------------------------------------------------------------
+
+
+proto.dust = function(scale,col,alpha) {
+
+    // create canvas //
+    var canvas = this.newCanvas();
+    var ctx = canvas.ctx;
+
+
+    // generate texture //
+    var cells = Math.ceil( this.size );
+    var r, g, b, a;
+    r = g = b = a = 1;
+    ctx.globalAlpha = alpha;
+
+    for (var i=0; i<cells; i++) {  // columns //
+
+        for (var j = 0; j < cells; j++) { // rows //
 
             color.fillRGBA(ctx, col.R * r, col.G * g, col.B * b, col.A * a );
             ctx.fillRect(i, j, 1, 1);

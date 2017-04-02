@@ -36,12 +36,12 @@ var mouseIsDown = false;
 
 
 // COLORS //
-var bgCols = [new RGBA(5,5,5,1),new RGBA(255,236,88,1)];
+var bgCols = [new RGBA(5,5,5,1),new RGBA(255,236,88,1),new RGBA(0,88,236,1)];
 var textCol = new RGBA(255,255,255,1);
 
 // TEXTURE //
 var texture;
-var textureCol = [new RGBA(155,155,255,1),new RGBA(255,88,236,1)];
+var textureCol = [new RGBA(155,155,255,1),new RGBA(255,88,236,1),new RGBA(10,180,150,1)];
 var noiseTexture;
 
 //-------------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ function init() {
 
     texture = new Texture(256,false);
     //noiseTexture = texture.noise(1, textureCol[1], 0.75, 0.8, 0.5);
-    noiseTexture = texture.cloud(0.8, textureCol[0], 1, 'green');
+    noiseTexture = texture.cloud(1.8, textureCol[1], 1, "blue", textureCol[2]);
 
     // DONE //
     /*fonts = new Fonts(['Bodoni:n4,o4'],2,function(){

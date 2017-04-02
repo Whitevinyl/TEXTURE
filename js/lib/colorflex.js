@@ -46,7 +46,7 @@ Color.prototype.blend = function(col1,col2,percent) {
     var r = col1.R + Math.round((col2.R - col1.R) * (percent/100));
     var g = col1.G + Math.round((col2.G - col1.G) * (percent/100));
     var b = col1.B + Math.round((col2.B - col1.B) * (percent/100));
-    var a = col1.A + Math.round((col2.A - col1.A) * (percent/100));
+    var a = col1.A + ((col2.A - col1.A) * (percent/100));
     return new RGBA(r,g,b,a);
 };
 
