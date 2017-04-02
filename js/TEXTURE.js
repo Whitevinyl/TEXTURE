@@ -157,7 +157,44 @@ proto.cloud = function(scale,col,alpha,mode,col2) {
 //-------------------------------------------------------------------------------------------
 
 
-proto.flecks = function(scale,col,alpha) {
+proto.flecks = function(scale,density,col,alpha) {
+
+    // create canvas //
+    var canvas = this.newCanvas();
+    var ctx = canvas.ctx;
+
+
+    // generate texture //
+    density = Math.ceil((this.size * this.size) * density);
+    ctx.globalAlpha = alpha;
+    var fleck = scale * 2.5;
+
+    color.stroke(ctx, col);
+    ctx.lineWidth = scale;
+    ctx.beginPath();
+    for (var i=0; i<density; i++) {  // flecks //
+
+        var x = Math.random() * this.size;
+        var y = Math.random() * this.size;
+
+        ctx.moveTo(x,y);
+        ctx.lineTo(x + tombola.range(-fleck,fleck), y + tombola.range(-fleck,fleck));
+
+    }
+    ctx.stroke();
+
+
+    // return texture //
+    return canvas.canvas;
+};
+
+
+//-------------------------------------------------------------------------------------------
+//  DUST
+//-------------------------------------------------------------------------------------------
+
+
+proto.dust = function(scale,col,alpha) {
 
     // create canvas //
     var canvas = this.newCanvas();
@@ -187,11 +224,11 @@ proto.flecks = function(scale,col,alpha) {
 
 
 //-------------------------------------------------------------------------------------------
-//  DUST
+//  GRAIN
 //-------------------------------------------------------------------------------------------
 
 
-proto.dust = function(scale,col,alpha) {
+proto.grain = function(scale,col,alpha) {
 
     // create canvas //
     var canvas = this.newCanvas();
