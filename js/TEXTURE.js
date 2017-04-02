@@ -83,7 +83,7 @@ proto.noise = function(scale,col,alpha,colorShift,erode) {
 };
 
 
-proto.cloud = function(scale,col,alpha) {
+proto.cloud = function(scale,col,alpha,mode) {
 
     // create canvas //
     var canvas = this.newCanvas();
@@ -93,7 +93,7 @@ proto.cloud = function(scale,col,alpha) {
     // generate texture //
     var simplex = new SimplexNoise();
     var cells = Math.ceil( this.size );
-    scale /= 200;
+    scale *= 200;
     var r, g, b, a;
     r = g = b = a = 1;
     ctx.globalAlpha = alpha;
@@ -102,8 +102,24 @@ proto.cloud = function(scale,col,alpha) {
 
         for (var j = 0; j < cells; j++) { // rows //
 
-            var n = simplex.noise(j / scale, i / scale);
-            a = (n + 1) / 2;
+            var n = (simplex.noise(j / scale, i / scale) + 1) / 2;
+            a = n;
+            if (mode) {
+                switch (mode) {
+                    case 'red':
+                        r = n;
+                        a = 1;
+                        break;
+                    case 'green':
+                        g = n;
+                        a = 1;
+                        break;
+                    case 'blue':
+                        b = n;
+                        a = 1;
+                        break;
+                }
+            }
 
             color.fillRGBA(ctx, col.R * r, col.G * g, col.B * b, col.A * a );
             ctx.fillRect(i, j, 1, 1);

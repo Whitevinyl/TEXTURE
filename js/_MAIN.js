@@ -74,7 +74,7 @@ function init() {
 
     texture = new Texture(256,false);
     //noiseTexture = texture.noise(1, textureCol[1], 0.75, 0.8, 0.5);
-    noiseTexture = texture.cloud(0.5, textureCol[1], 0.75);
+    noiseTexture = texture.cloud(0.8, textureCol[0], 1, 'green');
 
     // DONE //
     /*fonts = new Fonts(['Bodoni:n4,o4'],2,function(){
