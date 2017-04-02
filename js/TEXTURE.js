@@ -195,7 +195,7 @@ proto.flecks = function(scale,density,col,alpha) {
 //-------------------------------------------------------------------------------------------
 
 
-proto.dust = function(scale,col,alpha) {
+proto.dust = function(scale,density,col,alpha) {
 
     // create canvas //
     var canvas = this.newCanvas();
@@ -203,18 +203,74 @@ proto.dust = function(scale,col,alpha) {
 
 
     // generate texture //
-    var cells = Math.ceil( this.size );
-    var r, g, b, a;
-    r = g = b = a = 1;
-    ctx.globalAlpha = alpha;
+    density = Math.ceil((this.size * 10) * density);
+    color.fill(ctx, col );
+    color.stroke(ctx, col );
+    var simplex = new SimplexNoise();
 
-    for (var i=0; i<cells; i++) {  // columns //
 
-        for (var j = 0; j < cells; j++) { // rows //
+    for (var i=0; i<density; i++) {  // particles //
 
-            color.fillRGBA(ctx, col.R * r, col.G * g, col.B * b, col.A * a );
-            ctx.fillRect(i, j, 1, 1);
+        ctx.globalAlpha = alpha;
+        var x = Math.random() * this.size;
+        var y = Math.random() * this.size;
+        var fleck = scale * tombola.rangeFloat(1,2.5);
+        var r = fleck * tombola.rangeFloat(0.2,0.6);
+
+        // hairs //
+        if (tombola.percent(0.2)) {
+            var l = tombola.range(5,32);
+            var xs = tombola.range(-fleck,fleck);
+            var ys = tombola.range(-fleck,fleck);
+
+            ctx.lineWidth = tombola.rangeFloat(scale * 0.3,scale * 1.2);
+            ctx.beginPath();
+            ctx.moveTo(x,y);
+            for (var j=0; j<l; j++) {
+                xs += tombola.rangeFloat(-r,r);
+                ys += tombola.rangeFloat(-r,r);
+                x += xs;
+                y += ys;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
         }
+
+        // flecks //
+        else if (tombola.percent(6)) {
+            fleck = scale * tombola.rangeFloat(1.5,3);
+            ctx.lineWidth = tombola.rangeFloat(scale * 0.75,scale * 2);
+            ctx.beginPath();
+            ctx.moveTo(x,y);
+            ctx.lineTo(x + tombola.range(-fleck,fleck), y + tombola.range(-fleck,fleck));
+            ctx.stroke();
+        }
+
+
+        // grains //
+        else if (tombola.percent(0.3)) {
+            fleck = scale * tombola.rangeFloat(1.2,2);
+            ctx.globalAlpha = tombola.rangeFloat(alpha/2,alpha);
+            ctx.beginPath();
+            ctx.arc(x,y,fleck,0,TAU);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+
+        // specks //
+        else {
+            fleck = scale * tombola.rangeFloat(0.3,1.2);
+            var nScale = density/20;
+            var n = ((simplex.noise(x / nScale, y / nScale) + 1) / 2) + tombola.rangeFloat(-0.6,0.6);
+            if (n > 1) n = 1;
+            if (n < 0) n = 0;
+            ctx.globalAlpha = n * alpha;
+            ctx.fillRect(x, y, fleck, fleck);
+        }
+
+
+
 
     }
 

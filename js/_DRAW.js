@@ -16,7 +16,7 @@ function setupDrawing() {
 
 function drawBG() {
     ctx[0].globalAlpha = 1;
-    color.fill(ctx[0],bgCols[1]);
+    color.fill(ctx[0],bgCols[0]);
     ctx[0].fillRect(0,0,fullX,fullY);
 }
 
@@ -31,13 +31,13 @@ function drawScene() {
     var font = "Open Sans";
     var ct = ctx[0];
 
-
+/*
     color.fill(ct,textCol);
     ct.fillRect(dx - (15*u),dy - (15*u),30*u,30*u);
 
     ct.textAlign = 'center';
     ct.font = '400 ' + bodyType + 'px ' + font;
-    ct.fillText('Default',dx,dy + (60*u));
+    ct.fillText('Default',dx,dy + (60*u));*/
 
     ct.drawImage(noiseTexture,0,0);
 }
