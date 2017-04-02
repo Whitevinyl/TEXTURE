@@ -16,7 +16,7 @@ function setupDrawing() {
 
 function drawBG() {
     ctx[0].globalAlpha = 1;
-    color.fill(ctx[0],bgCols[0]);
+    color.fill(ctx[0],bgCols[1]);
     ctx[0].fillRect(0,0,fullX,fullY);
 }
 

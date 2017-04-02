@@ -165,23 +165,24 @@ proto.flecks = function(scale,density,col,alpha) {
 
 
     // generate texture //
-    density = Math.ceil((this.size * this.size) * density);
+    density = Math.ceil((this.size * 10) * density);
     ctx.globalAlpha = alpha;
-    var fleck = scale * 2.5;
+
 
     color.stroke(ctx, col);
-    ctx.lineWidth = scale;
-    ctx.beginPath();
+
     for (var i=0; i<density; i++) {  // flecks //
 
         var x = Math.random() * this.size;
         var y = Math.random() * this.size;
+        var fleck = scale * tombola.rangeFloat(1,2.5);
 
+        ctx.lineWidth = tombola.rangeFloat(scale/10,scale);
+        ctx.beginPath();
         ctx.moveTo(x,y);
         ctx.lineTo(x + tombola.range(-fleck,fleck), y + tombola.range(-fleck,fleck));
-
+        ctx.stroke();
     }
-    ctx.stroke();
 
 
     // return texture //
