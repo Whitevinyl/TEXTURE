@@ -413,7 +413,7 @@ proto.paint = function(scale,col1,col2,alpha) {
 };
 
 
-proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
+/*proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
 
     // set context //
     var ctx = canvas.ctx;
@@ -428,32 +428,43 @@ proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
     ctx.fillRect(0, 0, this.size, this.size);
     color.fill(ctx, col2 );
     color.stroke(ctx, col2 );
+    ctx.lineWidth = 1;
 
 
     var n = tombola.range(1000,2000);
     var t = tombola.range(500,1000);
     n = 1500;
     t = 400;
-    var particles = [];
+    var acc = 0.5;
 
     for (var i=0; i<n; i++) {  // particles //
         var p = new PaintParticle(tombola.range(0,this.size), tombola.range(0,this.size));
-        particles.push(p);
 
 
         for (var j=0; j<t; j++) {  // time //
 
             // draw //
-            var r = 500;
             ctx.globalAlpha = 0.25;
-            ctx.fillRect(p.x, p.y, p.size, p.size);
+            /!*ctx.fillRect(p.x, p.y, p.size, p.size);*!/
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.lx, p.ly);
+            ctx.stroke();
 
             // move //
-            r = 0.001;
+            var r = 500;
             var s = 1.5;
             var xOff = simplex.noise(p.x / r, p.y / r) * s;
             var yOff = simplex.noise(p.x / r, -p.y / r) * s;
-            p.move(xOff,yOff);
+            var px = p.xs + (xOff * acc);
+            var py = p.ys + (yOff * acc);
+            /!*if (px < -s) (px = -s);
+            if (px > s) (px = s);
+            if (py < -s) (py = -s);
+            if (py > s) (py = s);*!/
+
+            p.accelerate(px,py);
+            p.move(p.xs, p.ys);
 
         }
 
@@ -461,28 +472,49 @@ proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
     }
 
 
-    /*for (var i=0; i<cells; i++) {  // columns //
-
-        for (var j = 0; j < cells; j++) { // rows //
-
-            var s2 = scale;
-            var r = 60;
-            var xOff = simplex.noise(i / s2, j / s2) * r;
-            var yOff = (simplex.noise(i / s2, (j + 500) / s2) * r);
-
-            var d = 0.1;
-            var xd = tombola.rangeFloat(-d,d);
-            var yd = tombola.rangeFloat(-d,d);
+    // return texture //
+    return canvas.canvas;
+};*/
 
 
-            var n = (simplex.noise((j + xd) / (scale/300), (i + yd) / (scale * 500)) + 1) / 2;
-            var fillCol = color.blend(col1, col2, n*100);
+proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
 
-            color.fill(ctx, fillCol );
-            ctx.fillRect(i, j + yOff, 1, 1);
+    // set context //
+    var ctx = canvas.ctx;
+
+
+    // generate texture //
+    var simplex = new SimplexNoise();
+    var height = 30 * scale;
+    scale *= 200;
+    var cells = Math.ceil( this.size );
+    ctx.globalAlpha = alpha;
+    color.fill(ctx, col1 );
+    ctx.fillRect(0, 0, this.size, this.size);
+    color.fill(ctx, col2 );
+
+
+    var rows = cells + (height * 2);
+    for (var i=0; i<rows; i++) {  // rows //
+
+        var n = (simplex.noise(i/2, 0) + 1) / 2;
+        var fillCol = color.blend(col1, col2, n * 100);
+        color.fill(ctx, fillCol );
+
+        ctx.beginPath();
+        ctx.moveTo(this.size,this.size);
+        ctx.lineTo(0,this.size);
+
+        for (var j = 0; j < cells; j++) { // columns //
+
+            var y = simplex.noise(j / scale, i / (scale/2)) * height;
+
+            ctx.lineTo(j,i + y - height);
         }
+        ctx.closePath();
+        ctx.fill();
 
-    }*/
+    }
 
 
     // return texture //
@@ -490,14 +522,26 @@ proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
 };
 
 
+
 function PaintParticle(x,y) {
     this.x = x;
     this.y = y;
+    this.xs = 0;
+    this.ys = 0;
+    this.lx = x;
+    this.ly = y;
     this.size = tombola.rangeFloat(0.3,1);
 }
 proto = PaintParticle.prototype;
 
 proto.move = function(xs,ys) {
+    this.lx = this.x;
+    this.ly = this.y;
     this.x += xs;
     this.y += ys;
+};
+
+proto.accelerate = function(xs,ys) {
+    this.xs = xs;
+    this.ys = ys;
 };
