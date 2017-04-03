@@ -407,13 +407,13 @@ proto.drawDirt = function(canvas,scale,col,alpha) {
 //-------------------------------------------------------------------------------------------
 
 
-proto.paint = function(scale,col1,col2,alpha,col3) {
+proto.paint = function(scale,col1,col2,col3,alpha,contrast) {
     var canvas = this.newCanvas();
-    return this.drawPaint(canvas,scale,col1,col2,alpha,col3);
+    return this.drawPaint(canvas,scale,col1,col2,col3,alpha,contrast);
 };
 
 
-/*proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
+/*proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
 
     // set context //
     var ctx = canvas.ctx;
@@ -477,7 +477,7 @@ proto.paint = function(scale,col1,col2,alpha,col3) {
 };*/
 
 
-proto.drawPaint = function(canvas,scale,col1,col2,alpha,col3) {
+proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
 
     // set context //
     var ctx = canvas.ctx;
@@ -485,38 +485,40 @@ proto.drawPaint = function(canvas,scale,col1,col2,alpha,col3) {
 
     // generate texture //
     var simplex = new SimplexNoise();
-    var height = 180 * scale;
+    var height = 160 * scale;
+    var wobbleHeight = 60 * scale;
+    var pScale = 1/scale; // make adjustable
     scale *= 400;
+    contrast *= 100;
     var cells = Math.ceil( this.size );
     ctx.globalAlpha = alpha;
     var streakIndex = 0;
-    var contrast = 10;
     var rowOffset = 0;
 
-    var rows = cells + (height * 2);
+    var rows = cells + (height * 2) + (wobbleHeight * 2);
     for (var i=0; i<rows; i++) {  // rows //
 
         rowOffset += tombola.rangeFloat(-10,10);
 
         // progress vertical index for perlin //
         streakIndex += tombola.rangeFloat(-0.05,0.05);
-        if (tombola.percent(3)) {
+        if (tombola.percent(1.2 * pScale)) {
             streakIndex += tombola.rangeFloat(0.2,0.3);
         }
 
-        else if (tombola.percent(1)) {
+        else if (tombola.percent(0.7 * pScale)) {
             streakIndex += tombola.rangeFloat(1,2);
         }
 
         for (var j = 0; j < cells; j++) { // columns //
 
             var y = simplex.noise(j / (scale * 1.5), i / (scale * 2.5)) * height;
-
+            var w = simplex.noise((j + 1000) / (scale /3), i / (scale /3)) * wobbleHeight;
 
             // color value & contrast //
             var n = simplex.noise(streakIndex, (j + rowOffset) / (scale*2));
-            if (n > 0) { n += (1/100) * contrast; }
-            if (n < 0) { n += (-1/100) * contrast; }
+            if (n > 0) { n += ((1/100) * contrast); }
+            else { n += ((-1/100) * contrast); }
             n = (n + 1) / 2;
 
 
@@ -524,15 +526,15 @@ proto.drawPaint = function(canvas,scale,col1,col2,alpha,col3) {
             var fillCol;
             if (n > 0.5) {
                 n = (n - 0.5) * 2;
-                fillCol = color.blend(col2, col3, n * 100);
+                fillCol = color.blend2(col2, col3, n * 100);
             } else {
                 n *= 2;
-                fillCol = color.blend(col1, col2, n * 100);
+                fillCol = color.blend2(col1, col2, n * 100);
             }
 
             // draw //
             color.fill(ctx, fillCol );
-            ctx.fillRect(j,i + y - height, 1, 3);
+            ctx.fillRect(j,i + y + w - height - wobbleHeight, 1, 3);
         }
 
     }

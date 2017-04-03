@@ -50,6 +50,15 @@ Color.prototype.blend = function(col1,col2,percent) {
     return new RGBA(r,g,b,a);
 };
 
+Color.prototype.blend2 = function(col1,col2,percent) {
+    var p = percent/100;
+    var r = Math.floor(col1.R * (1-p)) + Math.ceil(col2.R * p);
+    var g = Math.floor(col1.G * (1-p)) + Math.ceil(col2.G * p);
+    var b = Math.floor(col1.B * (1-p)) + Math.ceil(col2.B * p);
+    var a = (col1.A * (1-p)) + (col2.A * p);
+    return new RGBA(r,g,b,a);
+};
+
 Color.prototype.darkerColor = function(col,darkness) {
     var r = this.valueInRange(col.R - darkness,0,255);
     var g = this.valueInRange(col.G - darkness,0,255);
