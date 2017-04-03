@@ -85,7 +85,8 @@ function init() {
     noiseTexture = texture.drawFlecks(texture.canvasObj(noiseTexture),1.5, 1, textureCol[3], 0.3);
     noiseTexture = texture.drawDust(texture.canvasObj(noiseTexture),0.6, 2, textureCol[3], 0.3);*/
 
-    noiseTexture = texture.paint(0.6, textureCol[6], textureCol[13], textureCol[9], 1, 0.05, 0.1);
+    noiseTexture = texture.paint(0.6, textureCol[3], textureCol[12], textureCol[10], 1, 0.05, 0.1);
+    //noiseTexture = texture.fxDisplace(texture.canvasObj(noiseTexture),100, 6, 0.65);
     //noiseTexture = texture.drawDirt(texture.canvasObj(noiseTexture),0.15, textureCol[3], 0.05);
     //noiseTexture = texture.drawDust(texture.canvasObj(noiseTexture),0.6, 20, textureCol[3], 0.8);
     //noiseTexture = texture.drawFlecks(texture.canvasObj(noiseTexture),1, 0.03, textureCol[3], 0.85);

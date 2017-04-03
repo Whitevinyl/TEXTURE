@@ -584,10 +584,11 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast,banding) {
 //  EFFECTS
 //-------------------------------------------------------------------------------------------
 
-proto.fxDisplace = function(canvas,chance,amount) {
+proto.fxDisplace = function(canvas,chance,amount,alpha) {
 
     // set context //
     var ctx = canvas.ctx;
+    ctx.globalAlpha = alpha;
 
 
     // generate texture //
@@ -598,12 +599,13 @@ proto.fxDisplace = function(canvas,chance,amount) {
         for (var j=0; j<cells; j++) { // rows //
 
             if (tombola.percent(chance)) {
-                var x = i + (tombola.range(-amount,amount));
-                var y = j + (tombola.range(-amount,amount));
+                var x = i + tombola.range(-amount,amount);
+                var y = j + tombola.range(-amount,amount);
 
-                if (x > -1 && x < this.size && y > -1 && y < this.size) {
-                    var p = canvas.getImageData(x, y, 1, 1).data;
-                    color.fillRGBA(ctx, p[0],p[1],p[2],p[3]);
+                if (x >= 0 && x < this.size && y >= 0 && y < this.size) {
+                    var p = ctx.getImageData(x, y, 1, 1).data;
+                    //color.fillRGBA(ctx, p[0],p[1],p[2],1);
+                    ctx.fillStyle = 'rgba('+p[0]+','+p[1]+','+p[2]+',255)';
                     ctx.fillRect(i,j,1,1);
                 }
             }
