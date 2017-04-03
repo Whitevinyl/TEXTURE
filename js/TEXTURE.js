@@ -487,7 +487,7 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
     var simplex = new SimplexNoise();
     var height = 150 * scale;
     var wobbleHeight = 16 * scale;
-    var driftHeight = 80 * scale;
+    var driftHeight = 100 * scale;
     var pScale = 1/scale; // make adjustable
     scale *= 400;
     contrast *= 100;
@@ -515,7 +515,8 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
 
             var y = simplex.noise(j / (scale * 1.5), i / (scale * 2.5)) * height;
             var w = simplex.noise((j + 1000) / (scale /2), i / (scale /2)) * wobbleHeight;
-            var d = simplex.noise(2000, i / (scale * 4)) * driftHeight;
+            var d = simplex.noise(2000, j / (scale * 2.5)) * driftHeight;
+
 
             // color value & contrast //
             var n = simplex.noise(streakIndex, (j + rowOffset) / (scale*2));
@@ -538,6 +539,25 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
             color.fill(ctx, fillCol );
             ctx.fillRect(j,i + y + w + d - height - wobbleHeight - driftHeight, 1, 3);
         }
+
+    }
+
+
+    // specks //
+    if (tombola.percent(50)) {
+        var speckNo = tombola.range(1,8);
+        var cx = tombola.range(0,this.size);
+        var cy = tombola.range(0,this.size);
+        var r = 16;
+
+        for (i=0; i<speckNo; i++) {
+            fillCol = color.blend2(col1, col2, tombola.range(0,50));
+            ctx.beginPath();
+            ctx.arc(cx + tombola.range(-r,r), cy + tombola.range(-r,r), tombola.range(0.5 * scale, 5 * scale), 0, TAU);
+            ctx.closePath();
+            ctx.fill();
+        }
+
 
     }
 
