@@ -407,9 +407,9 @@ proto.drawDirt = function(canvas,scale,col,alpha) {
 //-------------------------------------------------------------------------------------------
 
 
-proto.paint = function(scale,col1,col2,alpha) {
+proto.paint = function(scale,col1,col2,alpha,col3) {
     var canvas = this.newCanvas();
-    return this.drawPaint(canvas,scale,col1,col2,alpha);
+    return this.drawPaint(canvas,scale,col1,col2,alpha,col3);
 };
 
 
@@ -477,7 +477,7 @@ proto.paint = function(scale,col1,col2,alpha) {
 };*/
 
 
-proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
+proto.drawPaint = function(canvas,scale,col1,col2,alpha,col3) {
 
     // set context //
     var ctx = canvas.ctx;
@@ -490,13 +490,16 @@ proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
     var cells = Math.ceil( this.size );
     ctx.globalAlpha = alpha;
     var streakIndex = 0;
+    var dither = 0;
 
 
     var rows = cells + (height * 2);
     for (var i=0; i<rows; i++) {  // rows //
 
-        streakIndex += tombola.rangeFloat(-0.05,0.2);
-        if (tombola.percent(5)) {
+        var rowOffset = tombola.rangeFloat(-10,10);
+
+        streakIndex += tombola.rangeFloat(-0.05,0.05);
+        if (tombola.percent(3)) {
             streakIndex += tombola.rangeFloat(0.3,0.5);
         }
         /*var n = (simplex.noise(streakIndex, 0) + 1) / 2;
@@ -509,26 +512,37 @@ proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
 
         for (var j = 0; j < cells; j++) { // columns //
 
-            var y = simplex.noise(j / (scale * 1.2), i / (scale * 2)) * height;
+            var y = simplex.noise(j / (scale * 1.5), i / (scale * 2)) * height;
 
 
-            var n = simplex.noise(streakIndex, j / (scale*2));
+            var n = simplex.noise(streakIndex, (j + rowOffset) / (scale*2));
             if (n > 0) {
                 n += (1/100) * 15;
             }
             if (n < 0) {
                 n += (-1/100) * 20;
             }
-
             n = (n + 1) / 2;
 
-            var fillCol = color.blend(col1, col2, n * 100);
-            color.stroke(ctx, fillCol );
+            var d = tombola.rangeFloat(-dither,dither);
 
-            ctx.beginPath();
-            ctx.moveTo(j,i + y - height);
+            var fillCol;
+            if (n > 0.5) {
+                n = (n - 0.5) * 2;
+                fillCol = color.blend(col2, col3, n * 100);
+            } else {
+                n *= 2;
+                fillCol = color.blend(col1, col2, n * 100);
+            }
+
+            color.fill(ctx, fillCol );
+
+            /*ctx.beginPath();
+            ctx.moveTo(j,i + y - height + d);
             ctx.lineTo(j,this.size);
-            ctx.stroke();
+            ctx.stroke();*/
+
+            ctx.fillRect(j,i + y - height + d, 2, 2);
         }
         /*ctx.closePath();
         ctx.fill();*/
