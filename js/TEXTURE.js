@@ -407,13 +407,13 @@ proto.drawDirt = function(canvas,scale,col,alpha) {
 //-------------------------------------------------------------------------------------------
 
 
-proto.paint = function(scale,col1,col2,col3,alpha,contrast) {
+proto.paint = function(scale,col1,col2,col3,alpha,contrast,banding) {
     var canvas = this.newCanvas();
-    return this.drawPaint(canvas,scale,col1,col2,col3,alpha,contrast);
+    return this.drawPaint(canvas,scale,col1,col2,col3,alpha,contrast,banding);
 };
 
 
-/*proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
+/*proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast,banding) {
 
     // set context //
     var ctx = canvas.ctx;
@@ -477,7 +477,7 @@ proto.paint = function(scale,col1,col2,col3,alpha,contrast) {
 };*/
 
 
-proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
+proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast,banding) {
 
     // set context //
     var ctx = canvas.ctx;
@@ -488,7 +488,8 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
     var height = 140 * scale;
     var wobbleHeight = 15 * scale;
     var driftHeight = 110 * scale;
-    var pScale = 1/scale; // make adjustable
+    banding = banding || 0.8;
+    var pScale = banding/scale; // make adjustable
     scale *= 400;
     contrast *= 100;
     var cells = Math.ceil( this.size );
