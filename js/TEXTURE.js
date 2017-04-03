@@ -368,7 +368,6 @@ proto.drawDirt = function(canvas,scale,col,alpha) {
 
     // generate texture //
     var simplex = new SimplexNoise();
-    ctx.globalAlpha = alpha;
     color.fill(ctx, col );
 
 
@@ -384,7 +383,7 @@ proto.drawDirt = function(canvas,scale,col,alpha) {
         for (var j=0; j<t; j++) {  // time //
 
             // draw //
-            ctx.globalAlpha = 0.25;
+            ctx.globalAlpha = 0.25 * alpha;
             ctx.fillRect(p.x, p.y, p.size, p.size);
 
             // move //
@@ -579,6 +578,46 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast,banding) {
     // return texture //
     return canvas.canvas;
 };
+
+
+//-------------------------------------------------------------------------------------------
+//  EFFECTS
+//-------------------------------------------------------------------------------------------
+
+proto.fxDisplace = function(canvas,chance,amount) {
+
+    // set context //
+    var ctx = canvas.ctx;
+
+
+    // generate texture //
+    var cells = Math.ceil( this.size );
+
+    for (var i=0; i<cells; i++) {  // columns //
+
+        for (var j=0; j<cells; j++) { // rows //
+
+            if (tombola.percent(chance)) {
+                var x = i + (tombola.range(-amount,amount));
+                var y = j + (tombola.range(-amount,amount));
+
+                if (x > -1 && x < this.size && y > -1 && y < this.size) {
+                    var p = canvas.getImageData(x, y, 1, 1).data;
+                    color.fillRGBA(ctx, p[0],p[1],p[2],p[3]);
+                    ctx.fillRect(i,j,1,1);
+                }
+            }
+        }
+    }
+
+    return canvas.canvas;
+};
+
+
+
+//-------------------------------------------------------------------------------------------
+//  PARTICLE
+//-------------------------------------------------------------------------------------------
 
 
 
