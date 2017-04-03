@@ -485,34 +485,53 @@ proto.drawPaint = function(canvas,scale,col1,col2,alpha) {
 
     // generate texture //
     var simplex = new SimplexNoise();
-    var height = 30 * scale;
-    scale *= 200;
+    var height = 200 * scale;
+    scale *= 400;
     var cells = Math.ceil( this.size );
     ctx.globalAlpha = alpha;
-    color.fill(ctx, col1 );
-    ctx.fillRect(0, 0, this.size, this.size);
-    color.fill(ctx, col2 );
+    var streakIndex = 0;
 
 
     var rows = cells + (height * 2);
     for (var i=0; i<rows; i++) {  // rows //
 
-        var n = (simplex.noise(i/2, 0) + 1) / 2;
+        streakIndex += tombola.rangeFloat(-0.05,0.2);
+        if (tombola.percent(5)) {
+            streakIndex += tombola.rangeFloat(0.3,0.5);
+        }
+        /*var n = (simplex.noise(streakIndex, 0) + 1) / 2;
         var fillCol = color.blend(col1, col2, n * 100);
         color.fill(ctx, fillCol );
 
         ctx.beginPath();
         ctx.moveTo(this.size,this.size);
-        ctx.lineTo(0,this.size);
+        ctx.lineTo(0,this.size);*/
 
         for (var j = 0; j < cells; j++) { // columns //
 
-            var y = simplex.noise(j / scale, i / (scale/2)) * height;
+            var y = simplex.noise(j / (scale * 1.2), i / (scale * 2)) * height;
 
-            ctx.lineTo(j,i + y - height);
+
+            var n = simplex.noise(streakIndex, j / (scale*2));
+            if (n > 0) {
+                n += (1/100) * 15;
+            }
+            if (n < 0) {
+                n += (-1/100) * 20;
+            }
+
+            n = (n + 1) / 2;
+
+            var fillCol = color.blend(col1, col2, n * 100);
+            color.stroke(ctx, fillCol );
+
+            ctx.beginPath();
+            ctx.moveTo(j,i + y - height);
+            ctx.lineTo(j,this.size);
+            ctx.stroke();
         }
-        ctx.closePath();
-        ctx.fill();
+        /*ctx.closePath();
+        ctx.fill();*/
 
     }
 
