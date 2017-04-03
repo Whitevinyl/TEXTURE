@@ -485,8 +485,9 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
 
     // generate texture //
     var simplex = new SimplexNoise();
-    var height = 160 * scale;
-    var wobbleHeight = 60 * scale;
+    var height = 150 * scale;
+    var wobbleHeight = 16 * scale;
+    var driftHeight = 80 * scale;
     var pScale = 1/scale; // make adjustable
     scale *= 400;
     contrast *= 100;
@@ -495,7 +496,7 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
     var streakIndex = 0;
     var rowOffset = 0;
 
-    var rows = cells + (height * 2) + (wobbleHeight * 2);
+    var rows = cells + (height * 2) + (wobbleHeight * 2) + (driftHeight * 2);
     for (var i=0; i<rows; i++) {  // rows //
 
         rowOffset += tombola.rangeFloat(-10,10);
@@ -513,7 +514,8 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
         for (var j = 0; j < cells; j++) { // columns //
 
             var y = simplex.noise(j / (scale * 1.5), i / (scale * 2.5)) * height;
-            var w = simplex.noise((j + 1000) / (scale /3), i / (scale /3)) * wobbleHeight;
+            var w = simplex.noise((j + 1000) / (scale /2), i / (scale /2)) * wobbleHeight;
+            var d = simplex.noise(2000, i / (scale * 4)) * driftHeight;
 
             // color value & contrast //
             var n = simplex.noise(streakIndex, (j + rowOffset) / (scale*2));
@@ -534,7 +536,7 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast) {
 
             // draw //
             color.fill(ctx, fillCol );
-            ctx.fillRect(j,i + y + w - height - wobbleHeight, 1, 3);
+            ctx.fillRect(j,i + y + w + d - height - wobbleHeight - driftHeight, 1, 3);
         }
 
     }
