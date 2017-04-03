@@ -485,47 +485,42 @@ proto.drawPaint = function(canvas,scale,col1,col2,alpha,col3) {
 
     // generate texture //
     var simplex = new SimplexNoise();
-    var height = 200 * scale;
+    var height = 180 * scale;
     scale *= 400;
     var cells = Math.ceil( this.size );
     ctx.globalAlpha = alpha;
     var streakIndex = 0;
-    var dither = 0;
-
+    var contrast = 10;
+    var rowOffset = 0;
 
     var rows = cells + (height * 2);
     for (var i=0; i<rows; i++) {  // rows //
 
-        var rowOffset = tombola.rangeFloat(-10,10);
+        rowOffset += tombola.rangeFloat(-10,10);
 
+        // progress vertical index for perlin //
         streakIndex += tombola.rangeFloat(-0.05,0.05);
         if (tombola.percent(3)) {
-            streakIndex += tombola.rangeFloat(0.3,0.5);
+            streakIndex += tombola.rangeFloat(0.2,0.3);
         }
-        /*var n = (simplex.noise(streakIndex, 0) + 1) / 2;
-        var fillCol = color.blend(col1, col2, n * 100);
-        color.fill(ctx, fillCol );
 
-        ctx.beginPath();
-        ctx.moveTo(this.size,this.size);
-        ctx.lineTo(0,this.size);*/
+        else if (tombola.percent(1)) {
+            streakIndex += tombola.rangeFloat(1,2);
+        }
 
         for (var j = 0; j < cells; j++) { // columns //
 
-            var y = simplex.noise(j / (scale * 1.5), i / (scale * 2)) * height;
+            var y = simplex.noise(j / (scale * 1.5), i / (scale * 2.5)) * height;
 
 
+            // color value & contrast //
             var n = simplex.noise(streakIndex, (j + rowOffset) / (scale*2));
-            if (n > 0) {
-                n += (1/100) * 15;
-            }
-            if (n < 0) {
-                n += (-1/100) * 20;
-            }
+            if (n > 0) { n += (1/100) * contrast; }
+            if (n < 0) { n += (-1/100) * contrast; }
             n = (n + 1) / 2;
 
-            var d = tombola.rangeFloat(-dither,dither);
 
+            // set blended fill color //
             var fillCol;
             if (n > 0.5) {
                 n = (n - 0.5) * 2;
@@ -535,17 +530,10 @@ proto.drawPaint = function(canvas,scale,col1,col2,alpha,col3) {
                 fillCol = color.blend(col1, col2, n * 100);
             }
 
+            // draw //
             color.fill(ctx, fillCol );
-
-            /*ctx.beginPath();
-            ctx.moveTo(j,i + y - height + d);
-            ctx.lineTo(j,this.size);
-            ctx.stroke();*/
-
-            ctx.fillRect(j,i + y - height + d, 2, 2);
+            ctx.fillRect(j,i + y - height, 1, 3);
         }
-        /*ctx.closePath();
-        ctx.fill();*/
 
     }
 

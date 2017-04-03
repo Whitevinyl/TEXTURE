@@ -41,7 +41,7 @@ var textCol = new RGBA(255,255,255,1);
 
 // TEXTURE //
 var texture;
-var textureCol = [new RGBA(20,30,255,1),new RGBA(255,88,236,1),new RGBA(10,200,200,1),new RGBA(255,245,235,1),new RGBA(5,5,5,1),new RGBA(255,160,180,1),new RGBA(255,170,170,1),new RGBA(255,140,90,1)];
+var textureCol = [new RGBA(20,30,255,1),new RGBA(255,88,236,1),new RGBA(10,200,200,1),new RGBA(255,245,235,1),new RGBA(5,5,5,1),new RGBA(255,160,180,1),new RGBA(255,170,170,1),new RGBA(255,140,90,1),new RGBA(255,20,30,1),new RGBA(10,10,70,1),new RGBA(255,80,100,1)];
 var noiseTexture;
 
 color.lowPass = new RGBA(50,45,25,0);
@@ -85,7 +85,7 @@ function init() {
     noiseTexture = texture.drawFlecks(texture.canvasObj(noiseTexture),1.5, 1, textureCol[3], 0.3);
     noiseTexture = texture.drawDust(texture.canvasObj(noiseTexture),0.6, 2, textureCol[3], 0.3);*/
 
-    noiseTexture = texture.paint(0.75, textureCol[4], textureCol[0], 1,textureCol[7]);
+    noiseTexture = texture.paint(0.9, textureCol[9], textureCol[10], 1,textureCol[2]);
     //noiseTexture = texture.dirt(0.2, textureCol[2], 1);
     //noiseTexture = texture.cloud(1.8, textureCol[0], 1, 0.3, "blue", textureCol[1]);
 
