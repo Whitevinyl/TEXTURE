@@ -484,7 +484,7 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast,banding) {
 
     // generate texture //
     var simplex = new SimplexNoise();
-    var height = 140 * scale;
+    var height = 135 * scale;
     var wobbleHeight = 15 * scale;
     var driftHeight = 110 * scale;
     banding = banding || 0.8;
@@ -573,6 +573,76 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast,banding) {
             }
         }
     }
+
+
+    // return texture //
+    return canvas.canvas;
+};
+
+
+
+//-------------------------------------------------------------------------------------------
+//  GRADIENT
+//-------------------------------------------------------------------------------------------
+
+
+proto.gradient = function(scale,col1,col2,col3,alpha,contrast) {
+    var canvas = this.newCanvas();
+    return this.drawGradient(canvas,scale,col1,col2,col3,alpha,contrast);
+};
+
+
+
+proto.drawGradient = function(canvas,scale,col1,col2,col3,alpha,contrast) {
+
+    // set context //
+    var ctx = canvas.ctx;
+
+
+    // generate texture //
+    var x1 = tombola.range(0,this.size);
+    var x2 = tombola.range(0,this.size);
+
+    var simplex = new SimplexNoise();
+    scale *= 400;
+    contrast *= 100;
+    var cells = Math.ceil( this.size );
+    ctx.globalAlpha = alpha;
+
+    for (var i=0; i<cells; i++) {  // rows //
+
+
+
+        for (var j = 0; j < cells; j++) { // columns //
+
+            var b = (1/cells) * i;
+
+            var n = simplex.noise(j / (scale), i / (scale));
+
+
+            // color value & contrast //
+            if (n > 0) { n += ((1/100) * contrast); }
+            else { n += ((-1/100) * contrast); }
+            n = (n + 1) / 2;
+
+
+            // set blended fill color //
+            var fillCol;
+            if (b > 0.5) {
+                b = (b - 0.5) * 2;
+                fillCol = color.blend2(col2, col3, b * 100);
+            } else {
+                b *= 2;
+                fillCol = color.blend2(col1, col2, b * 100);
+            }
+
+            // draw //
+            color.fill(ctx, fillCol );
+            ctx.fillRect(j,i, 1, 3);
+        }
+
+    }
+
 
 
     // return texture //
