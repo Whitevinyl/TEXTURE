@@ -513,13 +513,20 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast,banding) {
 
         for (var j = 0; j < cells; j++) { // columns //
 
-            var y = simplex.noise(j / (scale * 1.5), i / (scale * 2.5)) * height;
-            var w = simplex.noise((j + 1000) / (scale /2), i / (scale /2)) * wobbleHeight;
+            var y = simplex.noise(j / (scale * 1.5), i / (scale * 2.5));
+            //y = waveShaper(y,0.4,3);
+            y *= height;
+
+            var w = simplex.noise((j + 1000) / (scale /2), i / (scale /2));
+            //w = waveShaper(w,0.5,5);
+            w *= wobbleHeight;
             var d = simplex.noise(2000, j / (scale * 2.5)) * driftHeight;
 
 
             // color value & contrast //
             var n = simplex.noise(streakIndex, (j + rowOffset) / (scale*2));
+            //n = waveShaper(n,0.2,5);
+
             if (n > 0) { n += ((1/100) * contrast); }
             else { n += ((-1/100) * contrast); }
             n = (n + 1) / 2;
@@ -537,7 +544,7 @@ proto.drawPaint = function(canvas,scale,col1,col2,col3,alpha,contrast,banding) {
 
             // draw //
             color.fill(ctx, fillCol );
-            ctx.fillRect(j,i + y + w + d - height - wobbleHeight - driftHeight, 1, 3);
+            ctx.fillRect(j,i + y + w + d - height - wobbleHeight - driftHeight, 1, 50);
         }
 
     }
@@ -593,7 +600,7 @@ proto.gradient = function(scale,col1,col2,col3,alpha,contrast) {
 
 
 
-proto.drawGradient = function(canvas,scale,col1,col2,col3,alpha,contrast) {
+proto.drawGradient = function(canvas,scale,col1,col2,col3,alpha) {
 
     // set context //
     var ctx = canvas.ctx;
@@ -602,12 +609,22 @@ proto.drawGradient = function(canvas,scale,col1,col2,col3,alpha,contrast) {
     // generate texture //
     var x1 = tombola.range(0,this.size);
     var x2 = tombola.range(0,this.size);
+    var y1 = 0;
+    var y2 = this.size;
+    y1 = tombola.range(0,this.size);
+    y2 = tombola.range(0,this.size);
+
+    var range = pointDistance(x1,y1,x2,y2);
+    var a1 = vectorAngle(x1,y1,x2,y2);
 
     var simplex = new SimplexNoise();
-    scale *= 400;
-    contrast *= 100;
+    scale *= 800;
     var cells = Math.ceil( this.size );
     ctx.globalAlpha = alpha;
+    var r = 0.04;
+    var perlin = 0.3;
+
+
 
     for (var i=0; i<cells; i++) {  // rows //
 
@@ -615,35 +632,58 @@ proto.drawGradient = function(canvas,scale,col1,col2,col3,alpha,contrast) {
 
         for (var j = 0; j < cells; j++) { // columns //
 
-            var b = (1/cells) * i;
+            // interpolate //
+            // use trig to get a linear position //
+            var h = pointDistance(x1,y1,j,i);
+            var a2 = vectorAngle(x1,y1,j,i);
 
-            var n = simplex.noise(j / (scale), i / (scale));
+            var a = a2 - a1;
+            var o = Math.sin(-a) * h;
+            var c = (TAU/4) + a;
+
+            var ip = lastPoint(j,i,a1 - a + c,o);
+            var ipa = vectorAngle(x1,y1,ip[0],ip[1]);
+            if ((ipa - a1) > (TAU/4) || (ipa - a1) < -(TAU/4)) {
+                ip[0] = x1;
+                ip[1] = y1;
+            }
+
+            var distance = pointDistance(x1,y1,ip[0],ip[1]);
+            var int = distance / range;
+            if (int < 0) int = 0;
+            if (int > 1) int = 1;
+            var b = int;
 
 
-            // color value & contrast //
-            if (n > 0) { n += ((1/100) * contrast); }
-            else { n += ((-1/100) * contrast); }
-            n = (n + 1) / 2;
+
+            // add white noise //
+            var n = tombola.rangeFloat(-r,r);
+            b += n;
+
+
+            // add simplex noise //
+            var p = ((simplex.noise(j / (scale), i / (scale)) + 1) / 2) * perlin;
+            p += (n * perlin);
+
 
 
             // set blended fill color //
-            var fillCol;
-            if (b > 0.5) {
-                b = (b - 0.5) * 2;
-                fillCol = color.blend2(col2, col3, b * 100);
-            } else {
-                b *= 2;
-                fillCol = color.blend2(col1, col2, b * 100);
-            }
+            var fillCol = color.blend2(col1, col2, b * 100);
+            fillCol = color.blend(fillCol,col3, p * 100);
 
             // draw //
             color.fill(ctx, fillCol );
-            ctx.fillRect(j,i, 1, 3);
+            ctx.fillRect(j,i, 1, 1);
         }
 
     }
 
 
+    /*color.stroke(ctx,textCol);
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
+    ctx.stroke();*/
 
     // return texture //
     return canvas.canvas;
@@ -686,6 +726,207 @@ proto.fxDisplace = function(canvas,chance,amount,alpha) {
 };
 
 
+proto.fxNoise = function(canvas,amount,mode) {
+
+    // set context //
+    var ctx = canvas.ctx;
+    ctx.globalAlpha = 1;
+
+
+    // generate texture //
+    var cells = Math.ceil( this.size );
+
+    for (var i=0; i<cells; i++) {  // columns //
+
+        for (var j=0; j<cells; j++) { // rows //
+
+            var n, r, g, b;
+            var p = ctx.getImageData(i, j, 1, 1).data;
+            switch (mode) {
+                default:
+                case 0:
+                    n = Math.round(tombola.range(-125,125) * amount);
+                    ctx.fillStyle = 'rgba('+(p[0] + n)+','+(p[1] + n)+','+(p[2] + n)+',255)';
+                    break;
+
+
+                case 1:
+                    n = 1 + (tombola.range(-1,1) * amount);
+                    r = Math.round(p[0] * n);
+                    g = Math.round(p[1] * n);
+                    b = Math.round(p[2] * n);
+                    if (r > 255) r = 255;
+                    if (g > 255) g = 255;
+                    if (b > 255) b = 255;
+                    if (r < 0) r = 0;
+                    if (g < 0) g = 0;
+                    if (b < 0) b = 0;
+
+                    ctx.fillStyle = 'rgba('+r+','+g+','+b+',255)';
+                    break;
+
+
+                case 2:
+                    n = (255 - ((255 - p[0]) * amount)) / 255;
+                    r = Math.round(p[0] * n);
+                    n = (255 - ((255 - p[1]) * amount)) / 255;
+                    g = Math.round(p[1] * n);
+                    n = (255 - ((255 - p[2]) * amount)) / 255;
+                    b = Math.round(p[2] * n);
+                    if (r > 255) r = 255;
+                    if (g > 255) g = 255;
+                    if (b > 255) b = 255;
+                    if (r < 0) r = 0;
+                    if (g < 0) g = 0;
+                    if (b < 0) b = 0;
+
+                    ctx.fillStyle = 'rgba('+r+','+g+','+b+',255)';
+                    //color.fillRGBA(ctx,r,g,b,1);
+                    break;
+            }
+
+            ctx.fillRect(i,j,1,1);
+        }
+    }
+
+    return canvas.canvas;
+};
+
+
+proto.fxGlitch = function(canvas,scale,amount,length,depth,angle) {
+
+    // set context //
+    var ctx = canvas.ctx;
+    ctx.globalAlpha = 1;
+
+    var canvas2 = this.newCanvas();
+    var ctx2 = canvas2.ctx;
+    //ctx2.globalAlpha = 0.1;
+
+    // angle //
+    if (angle==undefined || angle==null || angle!==angle) {
+        angle = tombola.range(0,360);
+    }
+    var a = degToRad(angle);
+    var v = vectorFromAngle(a);
+
+    console.log(angle);
+    console.log(v);
+
+    var simplex = new SimplexNoise();
+    scale *= 180;
+    length *= this.size;
+
+    var ts = 1;
+    var x = tombola.range(0,this.size);
+    var y = tombola.range(0,this.size);
+    var xs = tombola.rangeFloat(-ts * v.y,ts * v.y);
+    var ys = tombola.rangeFloat(-ts * v.x,ts * v.x);
+
+
+    var tl = 20000 * amount;
+    var l = Math.floor(50 * depth);
+
+    for (var t=0; t<tl; t++) {  // time //
+
+        // move origin //
+        if (tombola.percent(0.2)) {
+            x = tombola.range(0,this.size);
+            y = tombola.range(0,this.size);
+        }
+        x += xs;
+        y += ys;
+        var acc = 0.2;
+        xs += tombola.rangeFloat(-acc,acc);
+        ys += tombola.rangeFloat(-acc,acc);
+
+        // top speed //
+        if (xs > ts) xs = ts;
+        if (xs < -ts) xs = -ts;
+        if (ys > ts) ys = ts;
+        if (ys < -ts) ys = -ts;
+
+        // boundaries //
+        if (x > this.size || x < 0 || y > this.size || y < 0) {
+            x = tombola.range(0,this.size);
+            y = tombola.range(0,this.size);
+        }
+
+
+        // noise length //
+        var n = length * tombola.rangeFloat(0.5,1);
+        if (tombola.percent(10)) {
+            n *= tombola.rangeFloat(1.15,2);
+        }
+        var s = (simplex.noise(x / (scale), 0 / (scale)) + 1) / 2;
+
+
+        for (var i=0; i<=l; i++) {  // points //
+
+            // point origin //
+            var r = l;
+            var m = (i/l);
+            var xOff = tombola.range(-r,r);
+            xOff = ((-l*2) * m) * v.x;
+            var yOff = tombola.range(-r,r);
+            yOff = ((-l*2) * m) * v.y;
+
+            var px = x + xOff;
+            var py = y + yOff;
+            if (px < 0) px = 0;
+            if (py < 0) py = 0;
+            if (px >= this.size) px = this.size-1;
+            if (py >= this.size) py = this.size-1;
+
+
+            // get color at point //
+            var p = ctx.getImageData(px, py, 1, 1).data;
+            ctx2.strokeStyle = 'rgb(' + (p[0]) + ',' + (p[1]) + ',' + (p[2]) + ')';
+
+
+
+            // draw //
+            var mag = (n * s * s * (1-m));
+            ctx2.lineWidth = tombola.rangeFloat(0.5,1.2);
+
+            ctx2.beginPath();
+            ctx2.moveTo(px,py);
+            ctx2.lineTo(px + (v.x * mag), py + (v.y * mag));
+            ctx2.stroke();
+
+        }
+    }
+
+    ctx.drawImage(canvas2.canvas,0,0);
+
+    return canvas.canvas;
+};
+
+
+
+proto.drawImage = function(canvas,src,callback) {
+
+    // set context //
+    var ctx = canvas.ctx;
+    ctx.globalAlpha = 1;
+
+    var img = new Image();
+    var size = this.size;
+    img.onload = function () {
+
+        var w = img.width;
+        var h = img.height;
+
+        var mult = (Math.min(w,h) / size);
+
+        ctx.drawImage(img, 0, 0, w/mult, h/mult);
+        callback();
+    };
+    img.src = src;
+
+
+    return canvas.canvas;
+};
 
 //-------------------------------------------------------------------------------------------
 //  PARTICLE
@@ -715,3 +956,95 @@ proto.accelerate = function(xs,ys) {
     this.xs = xs;
     this.ys = ys;
 };
+
+
+function pointDistance(x1,y1,x2,y2) {
+    var a = x1 - x2;
+    var b = y1 - y2;
+    return Math.sqrt( (a*a) + (b*b) );
+}
+
+function vectorAngle(x1,y1,x2,y2) {
+    return Math.atan2(y2 - y1, x2 - x1);
+}
+
+function vectorFromAngle(angle) {
+    return new Vector(Math.cos(angle),Math.sin(angle));
+}
+
+function degToRad(deg) {
+    return deg * (Math.PI/180);
+}
+
+function lastPoint(x, y, angle, length) {
+    //length = typeof length !== 'undefined' ? length : 10;
+    //angle = angle * Math.PI / 180; // if you're using degrees instead of radians
+    return [length * Math.cos(angle) + x, length * Math.sin(angle) + y];
+}
+
+
+
+
+function waveShaper(input,amount,curve) {
+    //curve = utils.arg(curve,0);
+    var out = input;
+    var t,s;
+
+    switch (curve) {
+
+        case 0:
+            // hard mulispike peaks //
+            var k = 2*amount/(1-amount);
+            out = (1+k)*out/(1+k*Math.abs(out));
+            break;
+
+
+        case 1:
+            // sine peaks //
+            out = 1.5 * out - 0.5 * out * out * out;
+            break;
+
+
+        case 2:
+            // stepped wave staggering (the Batman) //
+            t = amount * sign(out);
+            s = 1; // 1 = hard, 20 = soft
+            out = out + ( (( (t + (1-t)) - (out * sign(out))) / s) * (out % t) ) ;
+            break;
+
+
+        case 3:
+            // stepped screamer (Machu Picchu) //
+            t = amount * sign(out);
+            s = 1; // 1 = hard, 20 = soft
+            out = out - ( (((t + (1-t)) - (out * sign(out))) / s) * (out % t) );
+            break;
+
+
+        case 4:
+            // robotic //
+            t = amount * sign(out);
+            s = 8; // should prob stay around 8
+            out = out - ( (((t + (1-t)) - (-out * sign(out))) / s) * (out % t) );
+            break;
+
+
+        case 5:
+            // square peaks //
+            t = amount * sign(out);
+            s = 0.9; // 0 - 1
+            out = out - ( ((out - t) / (2-s)) * (Math.abs(out) > amount) );
+            var r = 1 - ((1-amount) / (2-s));
+            out *= (r/(r*r));
+            break;
+
+    }
+
+    return out;
+}
+
+
+function sign(x) {
+    if (x > 0) { return 1; }
+    else { return -1; }
+}

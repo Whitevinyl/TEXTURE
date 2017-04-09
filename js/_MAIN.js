@@ -86,15 +86,21 @@ function init() {
     noiseTexture = texture.drawFlecks(texture.canvasObj(noiseTexture),1.5, 1, textureCol[3], 0.3);
     noiseTexture = texture.drawDust(texture.canvasObj(noiseTexture),0.6, 2, textureCol[3], 0.3);*/
 
-    //noiseTexture = texture.paint(1, textureCol2[0], textureCol2[3], textureCol2[2], 1, 0.05, 0.4);
-    noiseTexture = texture.gradient(1, textureCol2[0], textureCol2[3], textureCol2[2], 1, 0.05);
+    noiseTexture = texture.paint(1, textureCol2[0], textureCol2[3], textureCol2[2], 1, 0.05, 0.4);
+    //noiseTexture = texture.gradient(1, textureCol2[0], textureCol2[3], textureCol[3], 1, 0.05);
     //noiseTexture = texture.fxDisplace(texture.canvasObj(noiseTexture),100, 6, 0.65);
+    //noiseTexture = texture.fxNoise(texture.canvasObj(noiseTexture),0.03, 1);
     //noiseTexture = texture.drawDirt(texture.canvasObj(noiseTexture),0.15, textureCol[3], 0.05);
     //noiseTexture = texture.drawDust(texture.canvasObj(noiseTexture),0.6, 20, textureCol[3], 0.8);
     //noiseTexture = texture.drawFlecks(texture.canvasObj(noiseTexture),1, 0.03, textureCol[3], 0.85);
     //noiseTexture = texture.dirt(0.2, textureCol[2], 1);
     //noiseTexture = texture.cloud(1.8, textureCol[0], 1, 0.3, "blue", textureCol[1]);
+    noiseTexture = texture.drawImage(texture.canvasObj(noiseTexture),'nasa_visor.jpg',function() {
+        imgCallback();
+    });
 
+
+    //noiseTexture = texture.fxGlitch(texture.canvasObj(noiseTexture),0.9, 200);
 
     // DONE //
     /*fonts = new Fonts(['Bodoni:n4,o4'],2,function(){
@@ -107,7 +113,11 @@ function init() {
     draw();
 }
 
-
+function imgCallback() {
+    noiseTexture = texture.fxGlitch(texture.canvasObj(noiseTexture),1, 0.1, 0.4, 0.2);
+    //noiseTexture = texture.fxNoise(texture.canvasObj(noiseTexture),0.05, 0);
+    noiseTexture = texture.drawDust(texture.canvasObj(noiseTexture),0.6, 1, textureCol[3], 0.3);
+}
 
 
 //-------------------------------------------------------------------------------------------

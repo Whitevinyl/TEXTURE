@@ -3,6 +3,7 @@
 
 
 var DT;
+var logger = [0,0];
 function setupDrawing() {
     DT = tombola.range(100000,9999999);
 }
@@ -43,13 +44,13 @@ function drawScene() {
     var ts = texture.size / 2;
     ct.drawImage(noiseTexture,dx - ts,dy - ts);
 
-    color.fill(ct,textCol);
+    /*color.fill(ct,textCol);
     ct.fillRect(dx - (25*u),dy - (2*u),50*u,4*u);
     ct.textAlign = 'center';
     ct.font = '400 ' + bodyType + 'px ' + font;
     ct.fillText('FLOW',dx,dy - (10*u));
     ct.font = '400 ' + dataType + 'px ' + font;
-    ct.fillText(DT,dx,dy + (16*u));
+    ct.fillText(DT,dx,dy + (16*u));*/
 }
 
 

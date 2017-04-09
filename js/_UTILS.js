@@ -73,19 +73,6 @@ function vectorFromAngle(angle) {
 //-------------------------------------------------------------------------------------------
 
 
-function Point( x, y ) {
-    this.x = x || 0;
-    this.y = y || 0;
-}
-Point.prototype.clone = function() {
-    return new Point(this.x,this.y);
-};
-
-function Point3D( x, y, z ) {
-    this.x = x || 0;
-    this.y = y || 0;
-    this.z = z || 0;
-}
 
 function Vector( x, y ) {
     this.x = x || 0;
@@ -105,13 +92,3 @@ Vector.prototype.normalise = function() {
         this.y /= m;
     }
 };
-
-function Size( w, h ) {
-    this.w = w || 0;
-    this.h = h || 0;
-}
-
-
-function Alpha(a) {
-    this.a = a || 0;
-}

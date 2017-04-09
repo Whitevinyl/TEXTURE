@@ -19,8 +19,8 @@ function Point3D( x, y, z ) {
 }
 
 function Vector( x, y ) {
-    this.x = x || 0;
-    this.y = y || 0;
+    this.x = x;
+    this.y = y;
 }
 
 function Size( w, h ) {
